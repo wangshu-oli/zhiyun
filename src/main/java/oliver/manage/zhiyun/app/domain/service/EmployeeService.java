@@ -1,16 +1,14 @@
 package oliver.manage.zhiyun.app.domain.service;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.symmetric.DES;
-import cn.hutool.crypto.symmetric.SymmetricAlgorithm;
-import cn.hutool.crypto.symmetric.SymmetricCrypto;
-import java.nio.charset.StandardCharsets;
+import cn.dev33.satoken.stp.StpUtil;
 import javax.annotation.Resource;
 import oliver.manage.zhiyun.app.domain.entity.Employee;
 import oliver.manage.zhiyun.app.domain.repository.EmployeeRepository;
+import oliver.manage.zhiyun.app.domain.repository.GlobalConfigRepository;
 import oliver.manage.zhiyun.commom.Result;
+import oliver.manage.zhiyun.errorcode.DetailErrorCode;
+import oliver.manage.zhiyun.utils.ExceptionUtils;
+import oliver.manage.zhiyun.utils.SecureUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,23 +20,24 @@ public class EmployeeService {
 
     @Resource
     private EmployeeRepository repository;
+    @Resource
+    private GlobalConfigRepository globalConfigRepository;
+
+    private static final String AES_BASE64_KEY = "AES_BASE64_KEY";
 
     public Result<Boolean> login(String account, String password) {
         Employee employee = repository.getEmployee(account);
-        DES des = SecureUtil.des(employee.getPassword().getBytes(StandardCharsets.UTF_8));
-        return Result.success();
+        if (employee == null) {
+            throw ExceptionUtils.getException(DetailErrorCode.NONEXISTENT_EMPLOYEE);
+        }
+        String config = globalConfigRepository.getConfig(AES_BASE64_KEY);
+        String decryptedPassword = SecureUtils.decryptHexPassword(config, employee.getPassword());
+        if (password.equals(decryptedPassword)) {
+            StpUtil.login(employee.getId());
+            return Result.success();
+        } else {
+            throw ExceptionUtils.getException(DetailErrorCode.PASSWORD_WRONG_ERROR);
+        }
     }
 
-    public static void main(String[] args) {
-
-        String password = "314159";
-        byte[] key = Base64.decode("43dBvnie8LfRiFDxJfBT+w==".getBytes(StandardCharsets.UTF_8));
-        SymmetricCrypto aes = new SymmetricCrypto(SymmetricAlgorithm.AES, key);
-
-        String str = aes.encryptHex(password);
-        System.out.println("str = " + str);
-
-        String aaa = aes.decryptStr(str, CharsetUtil.CHARSET_UTF_8);
-        System.out.println("aaa = " + aaa);
-    }
 }

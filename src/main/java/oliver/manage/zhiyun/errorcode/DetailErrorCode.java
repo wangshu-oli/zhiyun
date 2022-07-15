@@ -10,7 +10,14 @@ import oliver.manage.zhiyun.enums.BusinessLine;
 @AllArgsConstructor
 public enum DetailErrorCode implements BizErrorCode {
 
-    REQUEST_PARAMS_NOT_VALID("001", "请求参数不合法");
+    REQUEST_PARAMS_NOT_VALID("001", "请求参数不合法"),
+
+    /**
+     * 员工模块错误
+     */
+    NONEXISTENT_EMPLOYEE("002", "无此账号"),
+
+    PASSWORD_WRONG_ERROR("003", "密码错误");
 
     private String code;
     private String errorMsg;
