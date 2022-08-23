@@ -19,7 +19,7 @@ CREATE UNIQUE INDEX uni_key ON global_config (config_key);
 DROP TABLE IF EXISTS employee;
 CREATE TABLE employee
 (
-    id           VARCHAR(32)  NOT NULL AUTO_INCREMENT COMMENT 'id',
+    id           bigint       NOT NULL AUTO_INCREMENT COMMENT 'id',
     account      VARCHAR(32)  NOT NULL COMMENT '账号',
     password     VARCHAR(255) NOT NULL COMMENT '密码',
     name         VARCHAR(10)  NOT NULL COMMENT '姓名',
@@ -32,4 +32,4 @@ CREATE TABLE employee
     PRIMARY KEY (id)
 ) COMMENT = '员工信息表';
 
-CREATE UNIQUE INDEX uni_account ON employee(account);
+CREATE UNIQUE INDEX uni_account ON employee (account);
